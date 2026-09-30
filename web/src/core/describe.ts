@@ -27,7 +27,7 @@ function verificationLine(d: Draft): string {
     `${STAGE_LABEL_KO.logo_print} ${v.logo_pass ? "통과" : "미달"}`,
     `${STAGE_LABEL_KO.scene} ${Math.round(v.scene_ratio * 100)}%`,
   ];
-  return `검증: ${stages.join(" → ")}${d.corrected ? " (교정 1회)" : ""}`;
+  return `검증: ${stages.join(" → ")}${d.corrected ? " (교정 1회)" : ""}${d.image?.mock ? " · mock 검증(실제 이미지 확인 아님)" : ""}`;
 }
 
 export function describeDraft(d: Draft, opts: { full?: boolean } = {}): string {
