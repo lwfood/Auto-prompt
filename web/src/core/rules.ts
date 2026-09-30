@@ -75,3 +75,14 @@ export const QA_THRESHOLDS = {
 } as const;
 
 export const PROMPT_MAX_CHARS = 1200;
+
+/** 입력 제한 (web /api/run, mcp zod 스키마가 함께 쓴다) */
+export const INPUT_LIMITS = {
+  images_min: 1,
+  images_max: 4,
+  /** 수정사항·USP 한 건 최대 글자 수 */
+  text_max: 200,
+  notes_max: 5,
+  /** 업로드 이미지 data URL 최대 길이 (약 6MB) */
+  data_url_max: 8_000_000,
+} as const;
