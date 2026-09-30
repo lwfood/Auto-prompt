@@ -8,9 +8,9 @@
 | `CLAUDE.md` | Claude Code용 프로젝트 지침 | 포함 |
 | `.claude/agents/` | 역할별 에이전트 9개 | 복원본(역할 기준 재작성) |
 | `docs/` | 기획·규칙·명세·결정 기록 | 일부 복원, 일부 골격 (아래 표 참고) |
-| `web/` | Next.js 웹앱 | **코드 복원 필요** (`RESTORE.md`) |
-| `engine/` | 매칭·방향·컴파일러·규칙 엔진 (Python) | **코드 복원 필요** |
-| `mcp/` | MCP 서버 (툴 9개, stdio + Streamable HTTP) | **코드 복원 필요** |
+| `web/` | Next.js 웹앱 (`src/core`는 MCP와 공유) | 복원 완료 (S3 미정의), vitest 52 |
+| `engine/` | 매칭·방향·컴파일러·규칙 엔진 (Python) | 복원 완료, 테스트 33 (TS와 golden 일치) |
+| `mcp/` | MCP 서버 (툴 9개, stdio + Streamable HTTP) | 복원 완료, vitest 18 |
 | `references/` | 레퍼런스 라이브러리 (`library.json`, 이미지) | 테스트용 4장 등록 (분석값 초안) |
 | `tests/` | 통합 테스트, `fixtures/products/` 테스트 제품 4종 | 제품 자료 포함 |
 
@@ -23,6 +23,14 @@
 | 골격 (내용 채우기 필요) | `User_Flow.md` |
 
 `확인 필요` 표시는 원본을 확인하지 못한 항목입니다. 추측으로 채우지 않았습니다.
+
+## 검증 명령
+```bash
+(cd web && npm ci && npx tsc --noEmit && npx vitest run && npx next build)
+(cd mcp && npm ci && npx tsc --noEmit && npx vitest run)
+python3 engine/tests/test_engine.py && python3 engine/tests/test_pipeline.py
+```
+코드 복원 중 남은 질문은 `docs/Decision_Log.md`의 Q-01~Q-12.
 
 ## 배포 전 결정 (Decision_Log 참고)
 C-05 인증 방식, C-06 저장소·배포 플랫폼, D-02 실제 레퍼런스 이미지, C-03 사용 권한.

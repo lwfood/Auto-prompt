@@ -12,7 +12,7 @@
 ## 2. 툴 (9개, 위젯 액션과 1:1)
 | 툴 | 역할 | 읽기 전용 |
 |---|---|---|
-| `create_drafts` | 만들기. 레퍼런스 없음 → 시안 3개, 레퍼런스 지정 → 시안 1개. `mode="prompt_only"`는 프롬프트만 | X |
+| `create_drafts` | 만들기. 레퍼런스 없음 → 방향별 시안(USP 있음 3개, 없음 2개), 지정 → 1개. `mode="prompt_only"`는 프롬프트만 | X |
 | `get_draft` | 프롬프트 전문, 반영 사항·배경색·검증·남은 문제 | O |
 | `suggest_alternatives` | 교체 모달의 대안 3개 (`other_directions`로 확장) | O |
 | `swap_reference` | 한 시안의 레퍼런스만 교체해 다시 생성 | X |
@@ -33,11 +33,16 @@
 - 잘못된 요청은 **400**
 - 제품 이미지가 없으면 시작하지 않음
 
-## 5. 변경 예정 (2026-09-30 결정)
-- `create_drafts` 입력에 **`usp`(선택, 문자열)** 추가
+## 5. 반영됨 (2026-09-30)
+- `create_drafts` 입력에 **`usp`(선택, 문자열)** 추가 — 구현됨
 - 프롬프트는 영어, 최대 1200자
 - 수량 배지·썸네일 관련 항목은 범위 밖이라 두지 않는다
 
 ## 6. 미구현
 - ChatGPT App용 **결과 기록 툴** (ChatGPT가 생성한 이미지의 검증·교정 결과 저장)
-- 정확한 요청·응답 JSON 스키마는 코드에서 추출해 추가 필요 (**확인 필요**)
+
+## 7. 입력 스키마 (코드 기준: `mcp/src/server.ts`, `web/src/lib/run.ts`)
+- `images`: 1~4개, `{ role: "product"|"reference", test_id?: "TPROD00", data_url?: "data:image/(png|jpeg|webp);base64,…", name? }` — test_id와 data_url 중 하나
+- `usp`, 수정사항 각 1~200자, 수정사항 최대 5개, `reference_id`: `TREF00`, `aspect`: `"4:5"` 형식, `draft_index`: 0~2, `job_id`: UUID
+- `/api/run`: `action` = `create` | `regenerate`(draft {index, direction, reference_id} 필요) | `alternatives`(current_reference_id), `excluded`로 추천 제외 목록 전달 (웹은 서버 상태 없음)
+- `/api/run` 응답: 200, 입력 오류 400, 재작업 생성 실패 502(실패 시안 포함), 그 외 500

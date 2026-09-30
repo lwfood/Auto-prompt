@@ -3,9 +3,9 @@
 ## 1. 자동 테스트 (마지막 확인 기준)
 | 대상 | 도구 | 개수 | 내용 |
 |---|---|---|---|
-| web | vitest | 41 | 규칙·워크플로우·API 검증 |
+| web | vitest | 52 | core 40(규칙·충돌·매칭·컴파일러·파이프라인), API 8, 화면 상태 3, golden 1 |
 | mcp | vitest | 18 | 서비스 9, 프로토콜 4, HTTP 4, stdio 실프로세스 1 |
-| engine | Python | 31 | `test_engine.py`, `test_pipeline.py` |
+| engine | Python | 33 | `engine/tests/test_engine.py` 23, `test_pipeline.py` 10 (TS golden 일치 포함) |
 | web 흐름 | Playwright | `e2e/flow_check.py` | 레퍼런스 교체, 프롬프트 복사, 입력 유지, 업로드 시 시안 1개 |
 | 타입·빌드 | tsc, next build | — | web, mcp 모두 통과 |
 
@@ -30,4 +30,4 @@
 ## 4. 알려진 한계
 - 현재 검증은 **연결과 규칙**만 확인하며 실제 이미지 품질은 알 수 없음 (mock 어댑터)
 - 실제 치수·픽셀 단위 인쇄 일치는 검증하지 않음
-- 개발 도구 취약점 경고 5건(vitest 2.1.9 → vite/esbuild): 개발 전용, `vitest run`만 사용하므로 영향 없음
+- vitest 4.1.11로 상향 (B-96). 설치에 `legacy-peer-deps` 필요

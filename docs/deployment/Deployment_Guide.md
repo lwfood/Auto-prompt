@@ -17,7 +17,7 @@ cd web && npm ci && npx tsc --noEmit && npx vitest run && npx next build
 cd mcp && npm ci && npx tsc --noEmit && npx vitest run
 
 # 엔진
-cd engine && python3 test_engine.py && python3 test_pipeline.py
+python3 engine/tests/test_engine.py && python3 engine/tests/test_pipeline.py
 ```
 > 출력 폴더 마운트에서는 `npm install`이 실패할 수 있으니 **로컬 디스크**에서 실행하세요.
 

@@ -1,7 +1,13 @@
-# engine/ — 코드 복원 필요
+# engine/ — 복원 완료 (2026-09-30)
 
-Python 규칙·파이프라인 엔진 코드가 사라져서 하위 폴더(`matching`, `direction`, `compiler`, `rules`, `tests`)가 비어 있습니다.
+Python 3 표준 라이브러리만 사용 (외부 패키지 없음). TS 코어와 같은 규칙을 구현한 **규칙 검증용** 엔진.
 
-- 마지막 확인: `test_engine.py`, `test_pipeline.py` 통과 (Python 테스트 31개)
-- 규칙 기준: `docs/rules/Conflict_Rule.md`, `Core_Rule.md`, `Transformer_Rule.md`
-- `requirements.txt` 내용은 확인 필요
+- `rules/` 규칙 표·색 표·수정사항 검사·충돌 해결 (`package_classes.json`, `matching_weights.json`는 TS와 공유)
+- `matching/`, `direction/`, `compiler/`, `pipeline.py` (mock 생성·검증)
+- `tests/test_engine.py` 23개, `tests/test_pipeline.py` 10개 (총 33개)
+- TS와의 일치: `tests/fixtures/golden/prompts.json`(TS가 생성)을 Python이 그대로 재현하는지 검사
+
+```bash
+python3 engine/tests/test_engine.py && python3 engine/tests/test_pipeline.py
+```
+`requirements.txt`는 확인 필요 항목이라 만들지 않았다 (현재 필요한 외부 패키지 없음).
