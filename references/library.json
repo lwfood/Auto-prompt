@@ -1,0 +1,87 @@
+{
+  "_note": "테스트용 레퍼런스 4장(TREF01~04). 이전 샘플(REF001~)과 무관. 이미지는 제3자 브랜드 자료이며 사용 권한 미확인(C-03) — 내부 테스트 전용. 분석값은 이미지를 눈으로 확인해 작성한 초안이며 수치는 근사값.",
+  "schema_version": "0.1",
+  "references": [
+    {
+      "id": "TREF01",
+      "file": "images/TREF01_natuur-vanilla.png",
+      "size_px": [1024, 1536],
+      "aspect": "2:3",
+      "art_direction": "Product Hero",
+      "source": "미확인 (사용 권한 확인 필요)",
+      "camera": {"elevation_deg": 35, "azimuth": "3/4 front, slightly left", "lens_feel": "medium telephoto, moderate depth of field"},
+      "composition": {"product_count": 1, "product_position": "center, upper-middle", "product_occupancy": "about 35% of frame width", "layout": "hero product back-center, props scattered in the foreground in a loose triangle"},
+      "background": {"wall_color": "mustard yellow", "floor_color": "cream", "structure": "flat wall meeting a flat tabletop, diagonal edge"},
+      "lighting": {"type": "hard directional", "direction": "from upper left", "shadow": "long, sharp shadows falling to the right"},
+      "pedestal": {"present": false},
+      "props": [
+        {"slot": "left-foreground", "content": "flower with leaves and long dark pods"},
+        {"slot": "lower-left", "content": "scoop with a frozen dessert"},
+        {"slot": "right", "content": "bowl with scoops of a frozen dessert"},
+        {"slot": "lower-right", "content": "cream-colored cubes and a flower"}
+      ],
+      "people_or_hands": false,
+      "structure_tricks": [],
+      "exclude_elements": ["reference product and its brand text", "printed package graphics"],
+      "notes": "props are tied to the reference product's flavor; replace contents with neutral or product-grounded props (X7)"
+    },
+    {
+      "id": "TREF02",
+      "file": "images/TREF02_cuppa-basket.jpg",
+      "size_px": [736, 920],
+      "aspect": "4:5",
+      "art_direction": "Flat Lay / Grouped Products",
+      "source": "미확인 (사용 권한 확인 필요)",
+      "camera": {"elevation_deg": 55, "azimuth": "front-right, high angle", "lens_feel": "normal lens, deep depth of field"},
+      "composition": {"product_count": 4, "product_position": "center, inside a container", "product_occupancy": "container about 75% of frame width", "layout": "multiple pouches overlapping in a shopping basket"},
+      "background": {"wall_color": "none (seamless)", "floor_color": "warm cream", "structure": "seamless studio sweep"},
+      "lighting": {"type": "hard directional", "direction": "from the right, low sun feel", "shadow": "slatted (window-blind) shadow pattern at lower left"},
+      "pedestal": {"present": false},
+      "props": [{"slot": "product container", "content": "blue plastic shopping basket"}],
+      "people_or_hands": false,
+      "structure_tricks": [],
+      "exclude_elements": ["four reference products and their brand text"],
+      "notes": "multi-product layout: keep exactly one product and adjust container fill or spacing (X6). Best for pouch/bag products."
+    },
+    {
+      "id": "TREF03",
+      "file": "images/TREF03_sanghamokjang-pouch.jpg",
+      "size_px": [640, 640],
+      "aspect": "1:1",
+      "art_direction": "Product Hero on Pedestal",
+      "source": "미확인 (사용 권한 확인 필요)",
+      "camera": {"elevation_deg": 8, "azimuth": "straight front", "lens_feel": "medium telephoto, soft background blur"},
+      "composition": {"product_count": 1, "product_position": "center, on a low round pedestal", "product_occupancy": "about 40% of frame height", "layout": "hero product centered, props on both sides at mid-height"},
+      "background": {"wall_color": "pale cream", "floor_color": "lilac / pink-purple", "structure": "wall and floor meet at the upper third"},
+      "lighting": {"type": "soft diffused", "direction": "from the upper left", "shadow": "soft, short shadow on the floor"},
+      "pedestal": {"present": true, "shape": "low round cylinder", "color": "lilac (same family as floor)"},
+      "props": [
+        {"slot": "left-mid", "content": "round fruit and sliced roots on a wooden plate"},
+        {"slot": "right-mid", "content": "glass teapot and wooden tray"},
+        {"slot": "lower-left", "content": "small dried fruit"}
+      ],
+      "people_or_hands": false,
+      "structure_tricks": [],
+      "exclude_elements": ["reference product, its Korean brand text and printed illustrations"],
+      "notes": "pedestal is CONDITIONAL (removable on request). Prop contents tied to the reference product's ingredients — replace (X7)."
+    },
+    {
+      "id": "TREF04",
+      "file": "images/TREF04_korner-cups.jpg",
+      "size_px": [735, 913],
+      "aspect": "4:5",
+      "art_direction": "Multi-Product Tiered Display",
+      "source": "미확인 (사용 권한 확인 필요)",
+      "camera": {"elevation_deg": 15, "azimuth": "front, slightly high", "lens_feel": "normal lens, deep depth of field"},
+      "composition": {"product_count": 3, "product_position": "staggered on three levels, center", "product_occupancy": "group about 80% of frame width", "layout": "diagonal stagger: back-right high, left mid, front low"},
+      "background": {"wall_color": "deep green gradient", "floor_color": "pale mint", "structure": "wall meets floor at lower third"},
+      "lighting": {"type": "hard directional with foliage-like dappled shadows", "direction": "from the upper right", "shadow": "dappled light pattern on floor and blocks"},
+      "pedestal": {"present": true, "shape": "rectangular blocks of different heights plus a flat tile", "color": "dark green"},
+      "props": [{"slot": "on top of each product", "content": "dried citrus slice with sticks and a star-shaped spice"}],
+      "people_or_hands": false,
+      "structure_tricks": [],
+      "exclude_elements": ["three reference products and their brand text", "AI-generator sparkle watermark at the bottom right corner"],
+      "notes": "multi-product tiered display: keep one product and one pedestal block (X6). A watermark sits in the bottom-right corner and must not be reproduced."
+    }
+  ]
+}

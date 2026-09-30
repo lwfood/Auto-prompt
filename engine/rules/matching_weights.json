@@ -1,0 +1,7 @@
+{
+  "_note": "초안 가중치. 샘플로 돌려 보며 조정한다.",
+  "hard_filters": ["reference_core_is_structure_trick", "reference_requires_people_or_hands_but_absent_in_reference"],
+  "score_max": 100,
+  "weights": {"product_fit": 40, "prop_match": 30, "color_match": 30},
+  "penalties": {"structure_trick_incidental": 15}
+}

@@ -1,0 +1,11 @@
+{
+  "_note": "패키지 클래스 6종 제안값. 각도는 카메라 고도(수평 기준 위로 몇 도)이며 튜닝 대상이다. 이전 샘플의 클래스 이름(BOX, CUP_DOME 등)은 복원하지 못해 새로 정했다.",
+  "classes": [
+    {"id": "BAG_PILLOW",   "example": "TPROD01 꼬깔콘", "elevation_deg": [0, 45], "note": "앞면 인쇄가 읽혀야 함. 위·아래 실링 형태 유지"},
+    {"id": "WRAP_FLOW",    "example": "TPROD03 돼지바빵", "elevation_deg": [0, 60], "note": "납작한 팩. 눕히거나 기울여도 앞면 유지. 옆 실링 유지"},
+    {"id": "CONE_SLEEVE",  "example": "TPROD04 월드콘", "elevation_deg": [10, 75], "note": "세로로 매우 긴 형태. 비율 유지, 인쇄 인물 사진은 그대로"},
+    {"id": "JAR_CYLINDER", "example": "TPROD02 자일리톨", "elevation_deg": [0, 60], "note": "원통 곡률·뚜껑·측면 탭 유지. 윗면 인쇄는 고각일 때만 노출"},
+    {"id": "CUP_TUB",      "example": "(테스트 제품 없음) 파인트 컵류", "elevation_deg": [0, 60], "note": "뚜껑 인쇄와 옆면 인쇄 모두 유지"},
+    {"id": "POUCH_STANDUP","example": "(테스트 제품 없음) 스탠드업·스파우트 파우치류", "elevation_deg": [0, 45], "note": "마개·주둥이 형태 유지"}
+  ]
+}
