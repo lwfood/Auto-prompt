@@ -83,6 +83,10 @@ export const INPUT_LIMITS = {
   /** 수정사항·USP 한 건 최대 글자 수 */
   text_max: 200,
   notes_max: 5,
+  /** USP 한 개 최대 글자 수 (Figma S1) */
+  usp_max: 40,
+  /** 오브제·색상 수정 최대 글자 수 */
+  override_max: 100,
   /** 업로드 이미지 data URL 최대 길이 (약 6MB) */
   data_url_max: 8_000_000,
 } as const;

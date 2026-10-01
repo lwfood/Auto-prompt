@@ -2,40 +2,203 @@
   "_note": "테스트용 제품 4종. 이전 샘플(TP01~)과 무관. 분석값은 이미지를 눈으로 확인한 초안.",
   "products": [
     {
-      "id": "TPROD01", "file": "TPROD01_kokalkon.jpg", "size_px": [3455, 4244],
+      "id": "TPROD01",
+      "file": "TPROD01_kokalkon.jpg",
+      "size_px": [
+        3455,
+        4244
+      ],
       "name_on_pack": "꼬깔콘 고소한맛 67g (LOTTE)",
-      "package_class": "BAG_PILLOW", "view": "flat front face",
-      "colors": {"primary": "red", "secondary": ["white", "yellow", "green accent"]},
-      "protected_elements": ["LOTTE logo", "꼬깔콘 wordmark and KOKALKON", "고소한맛 text", "소리까지 맛있다 badge", "corn and cone illustration", "crimped top and bottom seals", "OPEN mark", "nutrition/weight text"],
-      "package_motifs": ["corn cob and kernels", "cone-shaped snack"],
-      "risks": ["dense Korean text and stylized wordmarks are easy to distort"]
+      "package_class": "BAG_PILLOW",
+      "view": "flat front face",
+      "colors": {
+        "primary": "red",
+        "secondary": [
+          "white",
+          "yellow",
+          "green accent"
+        ]
+      },
+      "protected_elements": [
+        "LOTTE logo",
+        "꼬깔콘 wordmark and KOKALKON",
+        "고소한맛 text",
+        "소리까지 맛있다 badge",
+        "corn and cone illustration",
+        "crimped top and bottom seals",
+        "OPEN mark",
+        "nutrition/weight text"
+      ],
+      "package_motifs": [
+        "corn cob and kernels",
+        "cone-shaped snack"
+      ],
+      "risks": [
+        "dense Korean text and stylized wordmarks are easy to distort"
+      ],
+      "ko": {
+        "name": "꼬깔콘 고소한맛",
+        "primary": "빨강",
+        "secondary": [
+          "흰색",
+          "노랑",
+          "초록"
+        ],
+        "motifs": [
+          "옥수수와 옥수수 알갱이",
+          "고깔 모양 과자"
+        ]
+      }
     },
     {
-      "id": "TPROD02", "file": "TPROD02_xylitol-lab.jpg", "size_px": [2953, 3588],
+      "id": "TPROD02",
+      "file": "TPROD02_xylitol-lab.jpg",
+      "size_px": [
+        2953,
+        3588
+      ],
       "name_on_pack": "XYLITOL lab 워터링 100g (LOTTE)",
-      "package_class": "JAR_CYLINDER", "view": "3/4 front, slightly above",
-      "colors": {"primary": "white", "secondary": ["navy blue", "red star mark", "light blue label"]},
-      "protected_elements": ["LOTTE logo", "XYLITOL lab logo with red star mark", "워터링 badge", "headline text", "certification mark", "hinged cap with side tab", "gum pieces graphic", "small print text"],
-      "package_motifs": ["water-feel (워터링)", "gum pieces"],
-      "risks": ["white product on light backgrounds may blend in (contrast guard X5)", "very small text"]
+      "package_class": "JAR_CYLINDER",
+      "view": "3/4 front, slightly above",
+      "colors": {
+        "primary": "white",
+        "secondary": [
+          "navy blue",
+          "red star mark",
+          "light blue label"
+        ]
+      },
+      "protected_elements": [
+        "LOTTE logo",
+        "XYLITOL lab logo with red star mark",
+        "워터링 badge",
+        "headline text",
+        "certification mark",
+        "hinged cap with side tab",
+        "gum pieces graphic",
+        "small print text"
+      ],
+      "package_motifs": [
+        "water-feel (워터링)",
+        "gum pieces"
+      ],
+      "risks": [
+        "white product on light backgrounds may blend in (contrast guard X5)",
+        "very small text"
+      ],
+      "ko": {
+        "name": "자일리톨 lab 워터링",
+        "primary": "흰색",
+        "secondary": [
+          "남색",
+          "빨강",
+          "하늘색"
+        ],
+        "motifs": [
+          "물방울 느낌",
+          "껌 알갱이"
+        ]
+      }
     },
     {
-      "id": "TPROD03", "file": "TPROD03_dwaejibar-bread.jpg", "size_px": [2238, 1928],
+      "id": "TPROD03",
+      "file": "TPROD03_dwaejibar-bread.jpg",
+      "size_px": [
+        2238,
+        1928
+      ],
       "name_on_pack": "돼지바빵 150ml (LOTTE)",
-      "package_class": "WRAP_FLOW", "view": "flat top-down front face",
-      "colors": {"primary": "red", "secondary": ["white", "yellow", "pink"]},
-      "protected_elements": ["LOTTE logo", "돼지바빵 wordmark", "pig chef character", "product cross-section photo on pack", "strawberry illustration", "callout labels", "crimped side seals", "pig icon pattern"],
-      "package_motifs": ["strawberry", "cookie and chocolate", "pig character"],
-      "risks": ["cross-section image printed on the pack must not be mistaken for a structure trick (it is print, P1)", "characters and dense text"]
+      "package_class": "WRAP_FLOW",
+      "view": "flat top-down front face",
+      "colors": {
+        "primary": "red",
+        "secondary": [
+          "white",
+          "yellow",
+          "pink"
+        ]
+      },
+      "protected_elements": [
+        "LOTTE logo",
+        "돼지바빵 wordmark",
+        "pig chef character",
+        "product cross-section photo on pack",
+        "strawberry illustration",
+        "callout labels",
+        "crimped side seals",
+        "pig icon pattern"
+      ],
+      "package_motifs": [
+        "strawberry",
+        "cookie and chocolate",
+        "pig character"
+      ],
+      "risks": [
+        "cross-section image printed on the pack must not be mistaken for a structure trick (it is print, P1)",
+        "characters and dense text"
+      ],
+      "ko": {
+        "name": "돼지바빵",
+        "primary": "빨강",
+        "secondary": [
+          "흰색",
+          "노랑",
+          "분홍"
+        ],
+        "motifs": [
+          "딸기",
+          "쿠키와 초콜릿 조각"
+        ]
+      }
     },
     {
-      "id": "TPROD04", "file": "TPROD04_worldcone-vanilla.jpg", "size_px": [1012, 2872],
+      "id": "TPROD04",
+      "file": "TPROD04_worldcone-vanilla.jpg",
+      "size_px": [
+        1012,
+        2872
+      ],
       "name_on_pack": "월드콘 바닐라 (LOTTE)",
-      "package_class": "CONE_SLEEVE", "view": "flat unrolled front face (very tall)",
-      "colors": {"primary": "red and navy blue", "secondary": ["white", "gold-beige stars"]},
-      "protected_elements": ["LOTTE logo", "월드콘 wordmark", "headline text", "barcode", "star badge with flavor text", "ice cream photo on pack", "printed portrait photo of a person", "certification mark"],
-      "package_motifs": ["vanilla ice cream with chocolate sauce and crunchy pieces", "stars"],
-      "risks": ["a real person's photo is printed on the pack: reproduce as printed, never regenerate or alter the face", "very high aspect ratio (about 1:2.8) — tall cone shape must keep proportions", "person likeness/usage rights need checking"]
+      "package_class": "CONE_SLEEVE",
+      "view": "flat unrolled front face (very tall)",
+      "colors": {
+        "primary": "red and navy blue",
+        "secondary": [
+          "white",
+          "gold-beige stars"
+        ]
+      },
+      "protected_elements": [
+        "LOTTE logo",
+        "월드콘 wordmark",
+        "headline text",
+        "barcode",
+        "star badge with flavor text",
+        "ice cream photo on pack",
+        "printed portrait photo of a person",
+        "certification mark"
+      ],
+      "package_motifs": [
+        "vanilla ice cream with chocolate sauce and crunchy pieces",
+        "stars"
+      ],
+      "risks": [
+        "a real person's photo is printed on the pack: reproduce as printed, never regenerate or alter the face",
+        "very high aspect ratio (about 1:2.8) — tall cone shape must keep proportions",
+        "person likeness/usage rights need checking"
+      ],
+      "ko": {
+        "name": "월드콘 바닐라",
+        "primary": "빨강과 남색",
+        "secondary": [
+          "흰색",
+          "금빛 베이지"
+        ],
+        "motifs": [
+          "초콜릿 소스를 올린 바닐라 아이스크림",
+          "별"
+        ]
+      }
     }
   ]
 }

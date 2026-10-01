@@ -3,8 +3,8 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { expect, it } from "vitest";
-import { compilePrompt, rankReferences, REFERENCES, resolveConflicts, TEST_PRODUCTS, type DirectionId } from "@/core";
-import { packageBackdrop } from "@/core/compiler";
+import { compilePrompt, rankReferences, REFERENCES, resolveConflicts, TEST_PRODUCTS, uploadedReference, type DirectionId } from "@/core";
+import { packageBackdrop, usesPointColor } from "@/core/compiler";
 
 const FILE = path.join(import.meta.dirname, "../../tests/fixtures/golden/prompts.json");
 const USP = "오래 가는 바삭함";
@@ -14,9 +14,10 @@ function build() {
   const ranking: Record<string, Array<[string, number]>> = {};
   for (const p of TEST_PRODUCTS) {
     ranking[p.id] = rankReferences(p).map((s) => [s.reference_id, s.total]);
-    for (const r of REFERENCES) for (const d of ["USP", "HERO", "PACKAGE"] as DirectionId[]) {
-      const res = resolveConflicts(p, r, { usp: USP }, { backdrop: d === "PACKAGE" ? packageBackdrop(p) : undefined });
-      prompts[`${p.id}|${r.id}|${d}`] = compilePrompt({ product: p, reference: r, resolution: res, direction: d, usp: USP }).text;
+    for (const r of [...REFERENCES, uploadedReference(0)]) for (const d of ["USP", "HERO", "PACKAGE"] as DirectionId[]) {
+      const res = resolveConflicts(p, r, { usp: USP }, { backdrop: usesPointColor(d) ? packageBackdrop(p) : undefined });
+      const usp = d === "USP" ? USP : undefined;
+      prompts[`${p.id}|${r.id}|${d}`] = compilePrompt({ product: p, reference: r, resolution: res, direction: d, usp, usp_index: d === "USP" ? 0 : null }).text;
     }
   }
   return { usp: USP, ranking, prompts };

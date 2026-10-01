@@ -39,14 +39,15 @@ class PipelineTest(unittest.TestCase):
 
     def test_draft_counts(self):
         p = prod("TPROD01")
-        self.assertEqual(len(create_drafts(p, reference_id="TREF02")), 1)
+        self.assertEqual([d["reference_id"] for d in create_drafts(p, usps=[{"text": "x", "reference_id": "TREF02"}])], ["TREF02"])
         self.assertEqual([d["direction"] for d in create_drafts(p)], ["HERO", "PACKAGE"])
-        drafts = create_drafts(p, usp="오래 가는 바삭함")
-        self.assertEqual([d["direction"] for d in drafts], ["USP", "HERO", "PACKAGE"])
+        drafts = create_drafts(p, usps=[{"text": "a"}, {"text": "b"}, {"text": "c"}])
+        self.assertEqual([d["usp"]["index"] for d in drafts], [0, 1, 2])
         self.assertEqual(len({d["reference_id"] for d in drafts}), 3)
 
     def test_excluded(self):
-        self.assertNotIn("TREF04", [d["reference_id"] for d in create_drafts(prod("TPROD01"), usp="x", excluded={"TREF04"})])
+        drafts = create_drafts(prod("TPROD01"), usps=[{"text": "a"}, {"text": "b"}, {"text": "c"}], excluded={"TREF04"})
+        self.assertNotIn("TREF04", [d["reference_id"] for d in drafts])
 
     def test_one_correction_then_remaining_issue(self):
         calls = []
@@ -55,7 +56,7 @@ class PipelineTest(unittest.TestCase):
             calls.append(attempt)
             return checks([True], [False], [True] * 5)
 
-        d = create_drafts(prod("TPROD01"), reference_id="TREF04", verifier=verifier)[0]
+        d = create_drafts(prod("TPROD01"), usps=[{"text": "x", "reference_id": "TREF04"}], verifier=verifier)[0]
         self.assertEqual(calls, [1, 2])
         self.assertTrue(d["corrected"])
         self.assertTrue(any("로고·인쇄 미달" in x for x in d["remaining_issues"]))
@@ -72,7 +73,7 @@ class PipelineTest(unittest.TestCase):
         self.assertEqual(sorted(d["status"] for d in drafts), ["done", "failed"])
 
     def test_p1_note_rejected_with_warning(self):
-        d = create_drafts(prod("TPROD01"), reference_id="TREF04", options={"notes": ["로고 빼줘", "소품을 더 적게"]})[0]
+        d = create_drafts(prod("TPROD01"), usps=[{"text": "x", "reference_id": "TREF04"}], options={"notes": ["로고 빼줘", "소품을 더 적게"]})[0]
         self.assertIn("로고 변경·제거", d["warnings"][0])
         self.assertIn("소품을 더 적게", d["prompt"]["text"])
         self.assertNotIn("로고 빼줘", d["prompt"]["text"])

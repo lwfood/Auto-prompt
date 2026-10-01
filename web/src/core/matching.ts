@@ -121,3 +121,13 @@ export function suggestAlternatives(
   const others = ranked.filter((s) => !same.includes(s));
   return { alternatives: [...same, ...others].slice(0, count), widened: others.length > 0 };
 }
+
+export type FitTone = "best" | "ok" | "adjust";
+
+/** 라이브러리 카드의 적합도 표시 (◎ 잘 맞음 / ○ 가능 / △ 조정 필요). 기준 점수는 matching_weights.json */
+export function fitLabel(total: number): { tone: FitTone; label: string } {
+  const f = MATCHING_WEIGHTS.fit_labels;
+  if (total >= f.best) return { tone: "best", label: "◎ 잘 맞음" };
+  if (total >= f.ok) return { tone: "ok", label: "○ 가능" };
+  return { tone: "adjust", label: "△ 조정 필요" };
+}

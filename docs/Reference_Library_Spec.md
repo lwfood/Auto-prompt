@@ -20,6 +20,7 @@
 | `people_or_hands` | 사람·손 등장 여부 |
 | `structure_tricks` | 구조 변경 연출(단면·절단 등) 목록 |
 | `exclude_elements` | 반드시 제외할 요소 (제품, 브랜드 글자, 워터마크) |
+| `ko` | 프롬프트·화면용 한국어 표기 (name, azimuth, position, lighting_*, shadow, structure, wall/floor 색, pedestal, props[slot, short], exclude_elements). 영문 분석값의 번역이며 색 계산은 영문 값으로 한다 (B-103) |
 
 ## 현재 등록된 레퍼런스 (테스트용 4장)
 | ID | 종횡비 | 고도 | 제품 수 | 단상 | 사람·손 | 특징 |

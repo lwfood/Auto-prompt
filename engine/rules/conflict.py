@@ -40,8 +40,53 @@ def _log(log, cid, judgment, detail):
     log.append({"id": cid, "judgment": judgment, "detail": detail})
 
 
+def _screen_user_input(options, log):
+    """수정사항과 오브제·색상 수정을 같은 P1 기준으로 거른다."""
+    accepted, rejected = screen_notes(options.get("notes"))
+    overrides = {}
+    for key in ("props", "colors"):
+        v = ((options.get("overrides") or {}).get(key) or "").strip()
+        if not v:
+            continue
+        acc, rej = screen_notes([v])
+        if acc:
+            overrides[key] = acc[0]
+        else:
+            rejected.extend(rej)
+    n = len(accepted) + len(overrides)
+    if n or rejected:
+        _log(log, "X11", None, "수정사항 반영 %d건, 제외 %d건" % (n, len(rejected)))
+    return accepted, rejected, overrides
+
+
+def uploaded_reference(usp_index):
+    """PC에서 올린 레퍼런스 자리표시 (mock은 분석하지 않는다)."""
+    return {"id": "UPLOAD%d" % (usp_index + 1), "uploaded": True, "aspect": "", "props": [], "exclude_elements": [],
+            "structure_tricks": [], "people_or_hands": False, "pedestal": {"present": False},
+            "composition": {"product_count": 1}, "camera": {"elevation_deg": 0}}
+
+
+def _resolve_uploaded(product, options):
+    log = []
+    _log(log, "X4", "REPLACE", "레퍼런스 제품·브랜드·글자 제외, 입력 제품으로 교체")
+    _log(log, "X8", None, "드러나는 면은 연속성으로만 생성, 로고·문구·장식·부품 추가 금지")
+    user_aspect = options.get("aspect") if options.get("aspect") and ASPECT_RE.match(options["aspect"]) else None
+    accepted, rejected, overrides = _screen_user_input(options, log)
+    grounded = bool(product["package_motifs"])
+    return {
+        "aspect": user_aspect, "aspect_source": "user" if user_aspect else "reference",
+        "camera_elevation_deg": None, "camera_clamped": False, "product_count": 1,
+        "pedestal": {"keep": not options.get("remove_pedestal")}, "contrast_guard": False,
+        "props": {"slots": [], "contents": list(product["package_motifs"]) if grounded else [], "grounded": grounded},
+        "people_or_hands": False, "exclude": [], "accepted_notes": accepted, "rejected_notes": rejected,
+        "overrides": overrides, "log": log,
+    }
+
+
 def resolve_conflicts(product, ref, options=None, backdrop=None):
     options = options or {}
+    if ref.get("uploaded"):
+        return _resolve_uploaded(product, options)
     log, exclude = [], []
 
     for t in structure_tricks(ref):  # X1
@@ -85,9 +130,7 @@ def resolve_conflicts(product, ref, options=None, backdrop=None):
 
     _log(log, "X8", None, "드러나는 면은 연속성으로만 생성, 로고·문구·장식·부품 추가 금지")
 
-    accepted, rejected = screen_notes(options.get("notes"))  # X11
-    if accepted or rejected:
-        _log(log, "X11", None, "수정사항 반영 %d건, 제외 %d건" % (len(accepted), len(rejected)))
+    accepted, rejected, overrides = _screen_user_input(options, log)  # X11
 
     remove_pedestal = options.get("remove_pedestal") is True or requests_pedestal_removal(accepted)
     ped = ref["pedestal"]
@@ -109,5 +152,6 @@ def resolve_conflicts(product, ref, options=None, backdrop=None):
         "exclude": exclude,
         "accepted_notes": accepted,
         "rejected_notes": rejected,
+        "overrides": overrides,
         "log": log,
     }

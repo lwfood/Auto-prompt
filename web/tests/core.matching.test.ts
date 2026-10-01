@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  assignReferences, MATCHING_WEIGHTS, planDirections, rankReferences, REFERENCES, scoreReference, suggestAlternatives,
+  fitLabel, MATCHING_WEIGHTS, planDrafts, rankReferences, REFERENCES, scoreReference, suggestAlternatives,
 } from "../src/core";
 import { product, ref, syntheticRef } from "./helpers";
 
@@ -45,16 +45,31 @@ describe("매칭", () => {
   });
 });
 
-describe("방향", () => {
-  it("USP 있음 → USP·히어로·패키지, 없음 → 히어로·패키지", () => {
-    expect(planDirections("오래 가는 바삭함")).toEqual(["USP", "HERO", "PACKAGE"]);
-    expect(planDirections(undefined)).toEqual(["HERO", "PACKAGE"]);
-    expect(planDirections("   ")).toEqual(["HERO", "PACKAGE"]);
+describe("방향 (Figma S1: USP 번호 = 시안 번호)", () => {
+  it("USP가 있으면 USP마다 시안 1개(최대 3개), 없으면 히어로 → 패키지 분석", () => {
+    const ranked = rankReferences(product("TPROD03"));
+    expect(planDrafts([{ text: "a" }, { text: "b" }], ranked).map((p) => [p.direction, p.usp_index])).toEqual([["USP", 0], ["USP", 1]]);
+    expect(planDrafts([], ranked).map((p) => p.direction)).toEqual(["HERO", "PACKAGE"]);
+    expect(planDrafts([{ text: "  " }], ranked).map((p) => p.direction)).toEqual(["HERO", "PACKAGE"]);
+    expect(planDrafts([{ text: "a" }, { text: "b" }, { text: "c" }, { text: "d" }], ranked)).toHaveLength(3);
   });
 
-  it("방향마다 서로 다른 레퍼런스를 점수순으로", () => {
-    const a = assignReferences(planDirections("x"), rankReferences(product("TPROD03")));
-    expect(new Set(a.map((x) => x.reference_id)).size).toBe(3);
-    expect(a[0].match_score).toBeGreaterThanOrEqual(a[1].match_score);
+  it("지정한 레퍼런스는 그대로, 나머지는 겹치지 않게 점수순", () => {
+    const ranked = rankReferences(product("TPROD03"));
+    const plan = planDrafts([{ text: "a" }, { text: "b", reference_id: ranked[0].reference_id }, { text: "c", reference_upload: true }], ranked);
+    expect(plan[1].reference_id).toBe(ranked[0].reference_id);
+    expect(plan[0].reference_id).toBe(ranked[1].reference_id);
+    expect(plan[2].reference_id).toBe("UPLOAD");
+  });
+
+  it("남은 레퍼런스가 없으면 억지로 채우지 않는다", () => {
+    const ranked = rankReferences(product("TPROD03")).slice(0, 1);
+    expect(planDrafts([{ text: "a" }, { text: "b" }], ranked)[1].reference_id).toBeNull();
+  });
+
+  it("적합도 표시 ◎/○/△", () => {
+    expect(fitLabel(90).label).toBe("◎ 잘 맞음");
+    expect(fitLabel(80).label).toBe("○ 가능");
+    expect(fitLabel(60).label).toBe("△ 조정 필요");
   });
 });

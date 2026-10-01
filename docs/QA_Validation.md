@@ -11,7 +11,7 @@
 - 로고·인쇄 체크에는 **패키지에 인쇄된 인물 사진과 캐릭터**를 포함한다(TPROD03, TPROD04).
 
 ## 자동 테스트 (마지막 확인 기준, 코드 복원 후 재확인)
-web(vitest) 52, mcp(vitest) 18, engine(Python) 33 (2026-09-30 복원 후). Playwright 흐름은 수동 확인, 스크립트는 저장소에 없음.
+web(vitest) 65, mcp(vitest) 18, engine(Python) 36 (2026-10-01). Playwright 흐름은 수동 확인, 스크립트는 저장소에 없음.
 
 ## 테스트 자료
 `tests/fixtures/products/` 제품 4종, `references/images/` 레퍼런스 4장. 이 조합으로 위 매칭 표(Matching_Spec)의 ◎ 조합부터 검증한다.

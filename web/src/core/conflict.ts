@@ -2,7 +2,7 @@
 import { backgroundColors, isBuried } from "./color";
 import { getPackageClass } from "./data";
 import { requestsPedestalRemoval, screenNotes } from "./notes";
-import type { ConflictLogEntry, DraftOptions, Product, Reference, Resolution } from "./types";
+import type { ConflictLogEntry, DraftOptions, Overrides, Product, Reference, Resolution } from "./types";
 
 export const ASPECT_RE = /^\d{1,2}:\d{1,2}$/;
 
@@ -43,6 +43,7 @@ export function resolveConflicts(
   /** 패키지 분석 방향처럼 배경색을 바꾸는 경우 최종 배경색으로 대비를 판단한다 */
   ctx: { backdrop?: string } = {},
 ): Resolution {
+  if (ref.uploaded) return resolveUploaded(product, options);
   const log: ConflictLogEntry[] = [];
   const exclude: string[] = [];
 
@@ -108,15 +109,8 @@ export function resolveConflicts(
   // X8: 새 각도에서 드러나는 면 — 항상 적용되는 제약
   log.push({ id: "X8", judgment: null, detail: "드러나는 면은 연속성으로만 생성, 로고·문구·장식·부품 추가 금지" });
 
-  // X11: 사용자 수정사항 (P1 훼손 제외)
-  const screened = screenNotes(options.notes);
-  if (screened.accepted.length || screened.rejected.length) {
-    log.push({
-      id: "X11",
-      judgment: null,
-      detail: `수정사항 반영 ${screened.accepted.length}건, 제외 ${screened.rejected.length}건`,
-    });
-  }
+  // X11: 사용자 수정사항·오브제/색상 수정 (P1 훼손 제외)
+  const { screened, overrides } = screenUserInput(options, log);
 
   // 단상: CONDITIONAL (요청 시 제거)
   const removePedestal =
@@ -141,6 +135,75 @@ export function resolveConflicts(
     exclude,
     accepted_notes: screened.accepted,
     rejected_notes: screened.rejected,
+    overrides,
     log,
+  };
+}
+
+/** 수정사항과 오브제·색상 수정을 같은 P1 기준으로 거른다 */
+function screenUserInput(options: DraftOptions, log: ConflictLogEntry[]) {
+  const screened = screenNotes(options.notes);
+  const overrides: Overrides = {};
+  for (const key of ["props", "colors"] as const) {
+    const v = options.overrides?.[key]?.trim();
+    if (!v) continue;
+    const r = screenNotes([v]);
+    if (r.accepted.length) overrides[key] = r.accepted[0];
+    else screened.rejected.push(...r.rejected);
+  }
+  const accepted = screened.accepted.length + Object.keys(overrides).length;
+  if (accepted || screened.rejected.length) {
+    log.push({ id: "X11", judgment: null, detail: `수정사항 반영 ${accepted}건, 제외 ${screened.rejected.length}건` });
+  }
+  return { screened, overrides };
+}
+
+/** 사용자가 PC에서 올린 레퍼런스: mock은 분석하지 않으므로 첨부 이미지를 그대로 따르게 한다 */
+function resolveUploaded(product: Product, options: DraftOptions): Resolution {
+  const log: ConflictLogEntry[] = [
+    { id: "X4", judgment: "REPLACE", detail: "레퍼런스 제품·브랜드·글자 제외, 입력 제품으로 교체" },
+    { id: "X8", judgment: null, detail: "드러나는 면은 연속성으로만 생성, 로고·문구·장식·부품 추가 금지" },
+  ];
+  const userAspect = options.aspect && ASPECT_RE.test(options.aspect) ? options.aspect : undefined;
+  const { screened, overrides } = screenUserInput(options, log);
+  const grounded = product.package_motifs.length > 0;
+  return {
+    aspect: userAspect ?? null,
+    aspect_source: userAspect ? "user" : "reference",
+    camera_elevation_deg: null,
+    camera_clamped: false,
+    product_count: 1,
+    pedestal: { keep: !options.remove_pedestal },
+    contrast_guard: false,
+    props: { slots: [], contents: grounded ? [...product.package_motifs] : [], grounded },
+    // 레퍼런스에 있으면 재현, 없으면 넣지 않음 — 첨부 이미지 기준
+    people_or_hands: false,
+    exclude: [],
+    accepted_notes: screened.accepted,
+    rejected_notes: screened.rejected,
+    overrides,
+    log,
+  };
+}
+
+/** PC에서 올린 레퍼런스를 나타내는 자리표시 */
+export function uploadedReference(uspIndex: number): Reference {
+  return {
+    id: `UPLOAD${uspIndex + 1}`,
+    file: "",
+    size_px: [0, 0],
+    aspect: "",
+    art_direction: "Uploaded",
+    source: "사용자 업로드",
+    camera: { elevation_deg: 0, azimuth: "", lens_feel: "" },
+    composition: { product_count: 1, product_position: "", product_occupancy: "", layout: "" },
+    background: { wall_color: "", floor_color: "", structure: "" },
+    lighting: { type: "", direction: "", shadow: "" },
+    pedestal: { present: false },
+    props: [],
+    people_or_hands: false,
+    structure_tricks: [],
+    exclude_elements: [],
+    uploaded: true,
   };
 }

@@ -4,7 +4,7 @@ import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
 import {
   describeAlternatives, describeDraft, describeGenerationGuide, describeReference, describeResult, describeRules,
-  CONFLICT_TABLE, INPUT_LIMITS, INVARIANTS, PRIORITIES, PRODUCT_ID_RE, QA_THRESHOLDS, REFERENCE_ID_RE,
+  CONFLICT_TABLE, INPUT_LIMITS, USP_MAX, INVARIANTS, PRIORITIES, PRODUCT_ID_RE, QA_THRESHOLDS, REFERENCE_ID_RE,
   SERVER_INSTRUCTIONS, TRANSFORMER_TABLE, type Draft,
 } from "../../web/src/core/index";
 import { DraftService, InputError, NotFoundError } from "./service";
@@ -22,7 +22,8 @@ const referenceId = z.string().regex(REFERENCE_ID_RE, "레퍼런스 id 형식: T
 const jobId = z.string().uuid();
 const draftIndex = z.number().int().min(0).max(2);
 const image = z.object({
-  role: z.enum(["product", "reference"]),
+  role: z.enum(["product", "logo", "shape", "reference"]),
+  usp_index: z.number().int().min(0).max(USP_MAX - 1).optional(),
   test_id: z.string().regex(PRODUCT_ID_RE, "테스트 제품 id 형식: TPROD00").optional(),
   data_url: z.string().regex(/^data:image\/(png|jpeg|webp);base64,/).max(INPUT_LIMITS.data_url_max).optional(),
   name: z.string().max(INPUT_LIMITS.text_max).optional(),
@@ -56,6 +57,9 @@ function draftView(d: Draft) {
     prompt: d.prompt.text,
     prompt_length: d.prompt.length,
     summary_ko: d.prompt.summary_ko,
+    checklist: d.prompt.checklist,
+    usp: d.usp,
+    reference_name: d.reference_name,
     background_color: d.background_color,
     verification: d.verification,
     corrected: d.corrected,
@@ -70,11 +74,15 @@ export function createServer(service: DraftService = new DraftService()): McpSer
 
   server.registerTool("create_drafts", {
     title: "만들기",
-    description: "제품 이미지로 시안을 만든다. 레퍼런스 미지정 → 방향별 시안(USP 있음 3개, 없음 2개), 지정 → 1개. 확인을 묻지 않고 바로 생성한다. mode=prompt_only는 프롬프트만.",
+    description: "제품 이미지로 시안을 만든다. USP가 있으면 USP마다 시안 1개(최대 3개, USP 번호 = 시안 번호, USP별 레퍼런스 지정 가능), 없으면 히어로 → 패키지 분석 2개. 프롬프트는 한국어(최대 1200자). 확인을 묻지 않고 바로 생성한다. mode=prompt_only는 프롬프트만.",
     inputSchema: {
       images: z.array(image).min(INPUT_LIMITS.images_min).max(INPUT_LIMITS.images_max),
-      usp: text.optional(),
-      reference_id: referenceId.optional(),
+      product_name: z.string().trim().max(INPUT_LIMITS.text_max).optional(),
+      usps: z.array(z.object({
+        text: z.string().trim().max(INPUT_LIMITS.usp_max),
+        reference_id: referenceId.optional(),
+        reference_upload: z.boolean().optional(),
+      })).max(USP_MAX).optional(),
       aspect: z.string().regex(/^\d{1,2}:\d{1,2}$/).optional(),
       notes: z.array(text).max(INPUT_LIMITS.notes_max).optional(),
       remove_pedestal: z.boolean().optional(),
@@ -129,11 +137,20 @@ export function createServer(service: DraftService = new DraftService()): McpSer
 
   server.registerTool("regenerate_with_notes", {
     title: "수정사항 추가해서 다시 만들기",
-    description: "수정사항을 넣어 다시 생성한다. draft_index를 주면 그 시안만. 제품 보존을 훼손하는 수정사항은 제외하고 경고한다.",
-    inputSchema: { job_id: jobId, notes: z.array(text).min(1).max(INPUT_LIMITS.notes_max), draft_index: draftIndex.optional() },
+    description: "수정사항 또는 오브제·소품·색상 수정(overrides)을 넣어 다시 생성한다. draft_index를 주면 그 시안만. 제품 보존을 훼손하는 요청은 제외하고 경고한다.",
+    inputSchema: {
+      job_id: jobId,
+      notes: z.array(text).max(INPUT_LIMITS.notes_max).optional(),
+      overrides: z.object({
+        props: z.string().trim().max(INPUT_LIMITS.override_max).optional(),
+        colors: z.string().trim().max(INPUT_LIMITS.override_max).optional(),
+      }).optional(),
+      draft_index: draftIndex.optional(),
+    },
     annotations: { readOnlyHint: false },
-  }, ({ job_id, notes, draft_index }) => guard(async () => {
-    const r = await service.regenerateWithNotes(job_id, notes, draft_index);
+  }, ({ job_id, notes, overrides, draft_index }) => guard(async () => {
+    if (!notes?.length && !overrides) return fail("수정사항(notes) 또는 오브제·색상 수정(overrides)이 필요합니다.");
+    const r = await service.regenerateWithNotes(job_id, notes ?? [], draft_index, overrides);
     const failed = r.results.filter((x) => x.failed);
     const lines = r.results.map((x) =>
       x.failed ? `시안 ${x.kept.index + 1}: 다시 만들기 실패, 현재 결과 유지 (${x.failed.error})` : describeDraft(x.kept),

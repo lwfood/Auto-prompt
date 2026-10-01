@@ -35,14 +35,16 @@
 
 ## 5. 반영됨 (2026-09-30)
 - `create_drafts` 입력에 **`usp`(선택, 문자열)** 추가 — 구현됨
-- 프롬프트는 영어, 최대 1200자
+- 프롬프트는 한국어, 최대 1200자 (B-103)
 - 수량 배지·썸네일 관련 항목은 범위 밖이라 두지 않는다
 
 ## 6. 미구현
 - ChatGPT App용 **결과 기록 툴** (ChatGPT가 생성한 이미지의 검증·교정 결과 저장)
 
-## 7. 입력 스키마 (코드 기준: `mcp/src/server.ts`, `web/src/lib/run.ts`)
-- `images`: 1~4개, `{ role: "product"|"reference", test_id?: "TPROD00", data_url?: "data:image/(png|jpeg|webp);base64,…", name? }` — test_id와 data_url 중 하나
-- `usp`, 수정사항 각 1~200자, 수정사항 최대 5개, `reference_id`: `TREF00`, `aspect`: `"4:5"` 형식, `draft_index`: 0~2, `job_id`: UUID
-- `/api/run`: `action` = `create` | `regenerate`(draft {index, direction, reference_id} 필요) | `alternatives`(current_reference_id), `excluded`로 추천 제외 목록 전달 (웹은 서버 상태 없음)
+## 7. 입력 스키마 (코드 기준: `mcp/src/server.ts`, `web/src/lib/run.ts`, 2026-10-01)
+- `images`: `{ role: "product"|"logo"|"shape"|"reference", test_id?: "TPROD00", data_url?: "data:image/(png|jpeg|webp);base64,…", usp_index?, name? }` — test_id와 data_url 중 하나. 제품·로고·형태 합계 1~4장(로고·형태 각 1장), `reference`는 USP별 PC 업로드(data_url + usp_index)
+- `usps`: 최대 3개 `{ text: 40자 이하, reference_id?: "TREF00", reference_upload?: true }` — USP 번호 = 시안 번호
+- `product_name`(선택), 수정사항 각 1~200자·최대 5개, 오브제·색상 수정(`overrides: { props?, colors? }`) 각 100자, `aspect`: `"4:5"` 형식, `draft_index`: 0~2, `job_id`: UUID
+- `/api/run`: `action` = `create` | `regenerate`(draft {index, direction, usp_index, reference_id}, overrides) | `alternatives`, `mode` = `prompt_only`(기본, S2) | `generate`(S3, mock), `excluded`로 추천 제외 목록 전달 (웹은 서버 상태 없음)
 - `/api/run` 응답: 200, 입력 오류 400, 재작업 생성 실패 502(실패 시안 포함), 그 외 500
+- MCP `regenerate_with_notes`: `notes` 또는 `overrides`(오브제·소품·색상 수정) 중 하나 이상

@@ -1,26 +1,31 @@
 # Prompt Compiler Spec (v0.1)
 
 ## 결정
-- **프롬프트는 영어로 작성하고, 전체 합쳐서 최대 1200자**(네 블록 전체, 공백 포함)로 한다.
-- 화면에는 영어 프롬프트 전문과 **한국어 요약(반영 사항)**을 함께 보여 준다.
+- **프롬프트는 한국어로 작성하고, 전체 합쳐서 최대 1200자**(네 블록 전체, 공백 포함)로 한다. (B-103, 2026-10-01 사용자 요청. 기존 B-85 영어 결정을 대체)
+- 레퍼런스·제품의 영문 분석값은 색 계산(대비 가드·매칭)에만 쓰고, 프롬프트 문장은 `library.json`·`products.json`의 `ko` 표기로 만든다.
+- 화면에는 프롬프트 전문, 글자 수(`N / 1200자`), 반영 사항, **프롬프트 조건 확인**(Figma Prompt Card)을 함께 보여 준다.
 - 범위: **연출컷 제작과 프롬프트 작성**. 썸네일 제작은 범위 밖이다.
 
 ## 블록 순서
-1. `[PRODUCT INTEGRITY - TOP PRIORITY]` — 고정 블록, 최상단, 짧게 압축
-2. `[SCENE - MATCH THE REFERENCE]` — 종횡비, 카메라 고도, 렌즈감, 조명, 그림자, 배경 구조, 단상
-3. `[ADAPT]` — 배경·바닥 색, 오브제 (제품 이미지 기준)
-4. `[EXCLUDE]` — 레퍼런스 제품·브랜드·글자·워터마크, 수량(1개), 사람·손(레퍼런스에 없을 때)
+1. `[제품 보존 - 최우선]` — 고정 블록, 최상단. 로고 확대·제품 형태 이미지가 있으면 "보조 자료" 문장을 덧붙인다
+2. `[장면 - 레퍼런스와 동일]` — 종횡비, 카메라 고도, 배치·단상, 렌즈감, 조명·그림자, 배경 구조, 오브제 자리. PC에서 올린 레퍼런스는 분석하지 않으므로 "첨부한 레퍼런스 이미지를 그대로 따른다"로 쓰고 수치를 지어내지 않는다
+3. `[적응]` — 배경색(USP·패키지 분석 = 대표 포인트 컬러, 히어로 = 레퍼런스 톤, 사용자 지정이 있으면 그 값), 대비 가드, 오브제(패키지 인쇄 모티프 기반 범용 소품, 품목 단정 없음), USP 분위기(사실로 단정하지 않음), 사용자 요청
+4. `[제외]` — 레퍼런스 속 제품·브랜드명·글자, 광고 문구, 워터마크, 레퍼런스 소품, 수량(정확히 1개), 사람·손(레퍼런스에 없을 때)
 
 ## 길이 규칙
-- 1200자를 넘으면 [ADAPT]의 오브제 묘사부터 줄인다. [PRODUCT INTEGRITY]는 줄이지 않는다.
+- 1200자를 넘으면 순서대로 줄인다: 오브제 모티프 수 → 제외 목록을 일반 문구로 → 오브제 문장 삭제 → 수정사항을 뒤에서부터 삭제. `[제품 보존]`은 줄이지 않는다. 빠진 항목은 **남은 문제**로 표시한다.
+- 현재 한국어 프롬프트는 테스트 조합에서 약 580~740자라 보통 줄이지 않는다.
 - 충돌 결과는 `rules/Conflict_Rule.md` §4대로 배치한다.
 
-## 예시: TPROD01(꼬깔콘) × TREF04(초록 블록)  — 1046자
+## 프롬프트 조건 확인 (Figma Prompt Card)
+컴파일된 문장을 직접 검사해 통과 여부를 보인다: 제품이 메인 피사체 / 범용 오브제(품목명 단정 없음) / 카메라·구도·조명·그림자 유지 / 배경색 기준 / 균일 스케일만 사용 / 충돌 시 제품 보존 우선 / 로고·그래픽·색·인쇄 보존 / 광고 문구·워터마크 없음.
+
+## 예시: TPROD01(꼬깔콘) × TREF04(초록 블록), 히어로 — 694자 (코드 출력)
 ```
-[PRODUCT INTEGRITY - TOP PRIORITY] Use the attached product image as the only source of the product. Reproduce it exactly: shape, proportions, seals, colors, every logo, all Korean and English text, illustrations and print, at 100% fidelity. Do not redraw, translate, add or remove any text or graphic. Show the front face clearly.
-[SCENE - MATCH THE REFERENCE] Vertical 4:5 frame. Camera about 15 degrees above eye level, product centered on one dark green rectangular pedestal block. Same lens feel and depth of field as the reference. Hard warm key light from the upper right with soft dappled leaf-like shadows on a pale mint floor. Deep green gradient backdrop meeting the floor at the lower third.
-[ADAPT] Keep the green backdrop and mint floor so the red bag stands out. Place a few corn kernels and two golden cone-shaped snacks on and around the pedestal, following the reference's prop placement.
-[EXCLUDE] No reference cups, drinks, brand names, text, citrus slices, spices or corner watermark. Exactly one product. No people or hands.
+[제품 보존 - 최우선] 첨부한 제품 이미지를 제품의 유일한 기준으로 삼는다. 형태·비율·실링·색·모든 로고·한글과 영문 문구·일러스트·인쇄된 사진과 인쇄를 100% 그대로 재현한다. 문구나 그래픽을 다시 그리거나 번역하거나 더하거나 빼지 않는다. 크기는 비율 그대로만 바꾸고, 새 각도에서 보이는 면에 새 요소를 더하지 않는다. 제품 정면이 잘 보이게 한다.
+[장면 - 레퍼런스와 동일] 세로 4:5 화면. 카메라는 눈높이보다 약 15° 위, 정면에서 살짝 위. 제품 1개를 원래 제품들이 있던 자리 가운데, 짙은 초록 사각 받침 블록 1개 위에 둔다. 렌즈감과 심도는 레퍼런스와 같게. 조명은 나뭇잎 같은 얼룩 그림자가 지는 강한 직사광, 오른쪽 위에서. 바닥과 블록에 얼룩진 빛무늬. 배경 구조: 벽이 아래 1/3 지점에서 바닥과 만남. 오브제 자리는 레퍼런스와 같게(제품 위).
+[적응] 레퍼런스의 짙은 초록 그러데이션 벽과 옅은 민트 바닥 톤을 유지해 빨강 패키지가 돋보이게 한다. 제품이 주인공이 되도록 오브제는 적게, 패키지에 인쇄된 모티프(옥수수와 옥수수 알갱이, 고깔 모양 과자)를 바탕으로 한 범용 소품으로 하고 품목을 단정하지 않는다.
+[제외] 레퍼런스 속 제품·브랜드명·글자, 광고 문구, 워터마크, 오른쪽 아래 모서리의 AI 생성 도구 워터마크, 말린 시트러스 슬라이스와 향신료. 제품은 정확히 1개. 사람·손 없음.
 ```
 
 ## ChatGPT 내장 image_gen 흐름 (C-04 확답 필요)

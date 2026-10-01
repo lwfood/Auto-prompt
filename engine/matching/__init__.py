@@ -99,3 +99,13 @@ def suggest_alternatives(product, current_id, excluded=(), other_directions=True
         return same[:count], False
     others = [s for s in ranked if s not in same]
     return (same + others)[:count], len(others) > 0
+
+
+def fit_label(total):
+    """라이브러리 적합도 표시 (◎/○/△). 기준은 matching_weights.json fit_labels."""
+    f = MATCHING_WEIGHTS["fit_labels"]
+    if total >= f["best"]:
+        return "best", "◎ 잘 맞음"
+    if total >= f["ok"]:
+        return "ok", "○ 가능"
+    return "adjust", "△ 조정 필요"

@@ -1,6 +1,6 @@
 // 사람이 읽는 한국어 문구. web과 mcp가 같은 문구를 쓴다 (B-75).
 import { buildChecklist } from "./adapters";
-import { DIRECTION_LABEL_KO } from "./direction";
+import { directionTag } from "./direction";
 import type { MatchScore } from "./matching";
 import type { CreateResult } from "./pipeline";
 import { CONFLICT_TABLE, INVARIANTS_KO, PRIORITIES, QA_THRESHOLDS, TRANSFORMER_TABLE } from "./rules";
@@ -32,7 +32,7 @@ function verificationLine(d: Draft): string {
 
 export function describeDraft(d: Draft, opts: { full?: boolean } = {}): string {
   const lines = [
-    `시안 ${d.index + 1} · ${DIRECTION_LABEL_KO[d.direction]} · 레퍼런스 ${d.reference_id} (점수 ${d.match_score})`,
+    `시안 ${d.index + 1} · ${directionTag(d.direction, d.usp?.index)} · 레퍼런스 ${d.reference_name || d.reference_id}${d.reference_uploaded ? "" : ` (점수 ${d.match_score})`}`,
   ];
   if (d.status === "failed") {
     lines.push(`실패: ${d.error ?? "알 수 없는 오류"}`);
@@ -40,7 +40,8 @@ export function describeDraft(d: Draft, opts: { full?: boolean } = {}): string {
   }
   lines.push(`배경색: ${d.background_color}`);
   lines.push(verificationLine(d));
-  lines.push(`프롬프트: ${d.prompt.length}자`);
+  if (d.usp) lines.push(`USP ${d.usp.index + 1}: ${d.usp.text}`);
+  lines.push(`프롬프트: ${d.prompt.length} / 1200자`);
   if (opts.full) {
     lines.push("", d.prompt.text, "", "반영 사항:", ...d.prompt.summary_ko.map((s) => `- ${s}`));
   }
@@ -63,7 +64,7 @@ export function describeGenerationGuide(product: Product, d: Draft): string {
   const checklist = buildChecklist(product).map((c) => `- [${STAGE_LABEL_KO[c.stage]}] ${c.item}`);
   return [
     `시안 ${d.index + 1} 생성 지시`,
-    "이미지 역할: 첫 번째 첨부 = product(제품 원본, 유일한 제품 출처). 레퍼런스 이미지는 연출 참고용이며 그 속 제품·글자는 쓰지 않음.",
+    "이미지 역할: 제품 이미지 = 제품의 유일한 기준, 로고 확대·제품 형태 = 같은 제품을 확인하는 보조 자료, 레퍼런스 = 배경·조명·배치·카메라 각도만 참고하고 그 속 제품·글자는 쓰지 않음.",
     "확인을 묻지 말고 아래 프롬프트로 바로 생성합니다.",
     "",
     d.prompt.text,

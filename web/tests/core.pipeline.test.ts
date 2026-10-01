@@ -30,16 +30,23 @@ describe("검증 기준", () => {
 
 describe("파이프라인", () => {
   it("제품 이미지가 없으면 시작하지 않는다", async () => {
-    await expect(createDrafts({ images: [{ role: "reference", test_id: "TREF01" }] }, createMockAdapters())).rejects.toBeInstanceOf(InputError);
+    await expect(createDrafts({ images: [{ role: "logo", test_id: "TPROD01" }] }, createMockAdapters())).rejects.toBeInstanceOf(InputError);
   });
 
-  it("시안 수: 레퍼런스 지정 1개, USP 없음 2개, USP 있음 3개 (서로 다른 레퍼런스)", async () => {
+  it("시안 수: USP 없음 2개(히어로·패키지), USP 1~3개면 USP 수만큼 (서로 다른 레퍼런스, 지정 레퍼런스 유지)", async () => {
     const a = createMockAdapters();
-    expect((await createDrafts({ images: IMG, reference_id: "TREF02" }, a)).drafts).toHaveLength(1);
     expect((await createDrafts({ images: IMG }, a)).drafts.map((d) => d.direction)).toEqual(["HERO", "PACKAGE"]);
-    const r = await createDrafts({ images: IMG, usp: "오래 가는 바삭함" }, a);
-    expect(r.drafts.map((d) => d.direction)).toEqual(["USP", "HERO", "PACKAGE"]);
+    const one = await createDrafts({ images: IMG, usps: [{ text: "x", reference_id: "TREF02" }] }, a);
+    expect(one.drafts.map((d) => [d.direction, d.usp?.index, d.reference_id])).toEqual([["USP", 0, "TREF02"]]);
+    const r = await createDrafts({ images: IMG, usps: [{ text: "a" }, { text: "b" }, { text: "c" }] }, a);
+    expect(r.drafts.map((d) => d.usp?.text)).toEqual(["a", "b", "c"]);
     expect(new Set(r.drafts.map((d) => d.reference_id)).size).toBe(3);
+  });
+
+  it("제품명을 주면 그 이름을 쓴다, 지정 레퍼런스가 없으면 InputError", async () => {
+    const a = createMockAdapters();
+    expect((await createDrafts({ images: IMG, product_name: "위즐 바닐라 모나카" }, a)).product.name_on_pack).toBe("위즐 바닐라 모나카");
+    await expect(createDrafts({ images: IMG, usps: [{ text: "x", reference_id: "TREF99" }] }, a)).rejects.toBeInstanceOf(InputError);
   });
 
   it("확인 없이 생성·검증까지 진행한다 (mock 표시)", async () => {
@@ -61,7 +68,7 @@ describe("파이프라인", () => {
     const a: Adapters = createMockAdapters();
     let calls = 0;
     a.verifier = { async verify() { calls++; return checks([true], [false], [true, true, true, true, true]); } };
-    const r = await createDrafts({ images: IMG, reference_id: "TREF04" }, a);
+    const r = await createDrafts({ images: IMG, usps: [{ text: "x", reference_id: "TREF04" }] }, a);
     expect(calls).toBe(2);
     expect(r.drafts[0].corrected).toBe(true);
     expect(r.drafts[0].remaining_issues.join()).toContain("로고·인쇄 미달");
@@ -70,7 +77,7 @@ describe("파이프라인", () => {
   it("교정 후 통과하면 남은 문제 없음", async () => {
     const a: Adapters = createMockAdapters();
     a.verifier = { async verify({ attempt }) { return checks([true], [attempt > 1], [true]); } };
-    const d = (await createDrafts({ images: IMG, reference_id: "TREF04" }, a)).drafts[0];
+    const d = (await createDrafts({ images: IMG, usps: [{ text: "x", reference_id: "TREF04" }] }, a)).drafts[0];
     expect(d.corrected).toBe(true);
     expect(d.remaining_issues).toEqual([]);
   });
@@ -113,7 +120,7 @@ describe("공통 문구", () => {
   it("시안 설명에 남은 문제가 그대로 나온다", async () => {
     const a: Adapters = createMockAdapters();
     a.verifier = { async verify() { return checks([false], [true], [true]); } };
-    const d = (await createDrafts({ images: IMG, reference_id: "TREF04" }, a)).drafts[0];
+    const d = (await createDrafts({ images: IMG, usps: [{ text: "x", reference_id: "TREF04" }] }, a)).drafts[0];
     expect(describeDraft(d)).toContain("형태 미달");
   });
 });

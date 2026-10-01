@@ -1,17 +1,45 @@
 import { describe, expect, it } from "vitest";
 import type { Draft } from "@/core";
-import { addImage, applyRework, canStart, initialState, toggleExcluded } from "@/app/state";
+import {
+  applyRework, canAddProductImage, canStart, draftCount, initialState, requestBody, toggleExcluded, usedByOthers,
+} from "@/app/state";
 
 const draft = (index: number, ref: string) => ({ index, reference_id: ref } as unknown as Draft);
+const img = { name: "p.jpg", data_url: "data:image/png;base64,AA==" };
 
 describe("화면 상태", () => {
-  it("제품 이미지가 없으면 시작 불가, 이미지는 최대 4장", () => {
-    expect(canStart([])).toBe(false);
-    expect(canStart([{ role: "reference", test_id: "TPROD01" }])).toBe(false);
-    expect(canStart([{ role: "product", test_id: "TPROD01" }])).toBe(true);
-    let imgs = [] as ReturnType<typeof addImage>;
-    for (let i = 0; i < 6; i++) imgs = addImage(imgs, { role: "product", test_id: "TPROD01" });
-    expect(imgs).toHaveLength(4);
+  it("제품 이미지가 없으면 시작 불가, 제품·로고·형태 합계 최대 4장", () => {
+    expect(canStart(initialState)).toBe(false);
+    expect(canStart({ ...initialState, logo: img })).toBe(false);
+    expect(canStart({ ...initialState, productImages: [img] })).toBe(true);
+    expect(canAddProductImage({ ...initialState, productImages: [img, img], logo: img, shape: img })).toBe(false);
+  });
+
+  it("시안 수 안내: USP가 없으면 2개, 있으면 USP 수", () => {
+    expect(draftCount([{ text: "", reference: null }])).toBe(2);
+    expect(draftCount([{ text: "a", reference: null }, { text: " ", reference: null }, { text: "b", reference: null }])).toBe(2);
+    expect(draftCount([{ text: "a", reference: null }])).toBe(1);
+  });
+
+  it("요청 본문: 빈 USP는 빼고, 번호를 다시 매겨 레퍼런스 업로드를 그 USP에 연결", () => {
+    const body = requestBody({
+      ...initialState,
+      productImages: [{ test_id: "TPROD01", name: "x" }],
+      logo: img,
+      usps: [
+        { text: "", reference: { kind: "library", id: "TREF01" } },
+        { text: "두 번째", reference: { kind: "upload", data_url: img.data_url, name: "ref.png" } },
+      ],
+    });
+    expect(body.usps).toEqual([{ text: "두 번째", reference_upload: true }]);
+    expect(body.images.map((i) => [i.role, i.usp_index])).toEqual([["product", undefined], ["logo", undefined], ["reference", 0]]);
+    expect(body.mode).toBe("prompt_only");
+  });
+
+  it("다른 USP가 쓰는 라이브러리 레퍼런스는 선택 불가 목록에 들어간다", () => {
+    const usps = [{ text: "a", reference: { kind: "library" as const, id: "TREF01" } }, { text: "b", reference: null }];
+    expect([...usedByOthers(usps, 1).entries()]).toEqual([["TREF01", 0]]);
+    expect(usedByOthers(usps, 0).size).toBe(0);
   });
 
   it("재작업 실패: 현재 결과 유지 + 안내 + 제외했던 레퍼런스 복원", () => {

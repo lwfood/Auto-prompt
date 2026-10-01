@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import {
   createDrafts, createMockAdapters, InputError, regenerateDraft, suggestAlternatives,
   type Adapters, type CreateResult, type Draft, type DraftOptions, type InputImage, type MatchScore,
-  type Product, type Reference, type RunMode,
+  type Overrides, type Product, type Reference, type RunMode, type UspInput,
 } from "../../web/src/core/index";
 
 export const JOB_TTL_MS = 60 * 60 * 1000;
@@ -22,9 +22,11 @@ export interface Job {
   drafts: Draft[];
 }
 
-export interface CreateArgs extends DraftOptions {
+export interface CreateArgs extends Omit<DraftOptions, "usp" | "overrides" | "has_support_images"> {
   images: InputImage[];
-  reference_id?: string;
+  /** 최대 3개. USP 번호 = 시안 번호 */
+  usps?: UspInput[];
+  product_name?: string;
   mode?: RunMode;
 }
 
@@ -63,9 +65,9 @@ export class DraftService {
   }
 
   async create(args: CreateArgs): Promise<{ job: Job; result: CreateResult }> {
-    const options: DraftOptions = { usp: args.usp, aspect: args.aspect, notes: args.notes, remove_pedestal: args.remove_pedestal };
+    const options: DraftOptions = { aspect: args.aspect, notes: args.notes, remove_pedestal: args.remove_pedestal };
     const result = await createDrafts(
-      { ...options, images: args.images, reference_id: args.reference_id, mode: args.mode, excluded: this.excluded },
+      { ...options, images: args.images, usps: args.usps, product_name: args.product_name, mode: args.mode, excluded: this.excluded },
       this.adapters,
     );
     const job: Job = {
@@ -98,9 +100,13 @@ export class DraftService {
   }
 
   /** 다시 만들기. 실패하면 현재 결과를 유지하고 실패 시안을 따로 돌려준다 */
-  private async rework(job: Job, index: number, patch: { reference_id?: string; notes?: string[] }) {
+  private async rework(job: Job, index: number, patch: { reference_id?: string; notes?: string[]; overrides?: Overrides }) {
     const current = this.draftOf(job, index);
-    const options: DraftOptions = patch.notes ? { ...job.options, notes: [...(job.options.notes ?? []), ...patch.notes] } : job.options;
+    const options: DraftOptions = {
+      ...job.options,
+      ...(patch.notes ? { notes: [...(job.options.notes ?? []), ...patch.notes] } : {}),
+      overrides: patch.overrides ?? current.resolution.overrides,
+    };
     const next = await regenerateDraft(
       { product: job.product, draft: current, images: job.images, reference_id: patch.reference_id, options, mode: job.mode },
       this.adapters,
@@ -116,12 +122,12 @@ export class DraftService {
     return { job, ...(await this.rework(job, index, { reference_id: referenceId })) };
   }
 
-  async regenerateWithNotes(jobId: string, notes: string[], index?: number) {
+  async regenerateWithNotes(jobId: string, notes: string[], index?: number, overrides?: Overrides) {
     const job = this.getJob(jobId);
     const indexes = index === undefined ? job.drafts.map((d) => d.index) : [index];
     for (const i of indexes) this.draftOf(job, i);
     const results = [];
-    for (const i of indexes) results.push(await this.rework(job, i, { notes }));
+    for (const i of indexes) results.push(await this.rework(job, i, { notes, overrides }));
     // 수정사항은 이후 재작업에도 유지 (한 시안만이면 그 시안에만 반영된 상태)
     if (index === undefined && results.every((r) => !r.failed)) {
       job.options = { ...job.options, notes: [...(job.options.notes ?? []), ...notes] };

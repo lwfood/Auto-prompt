@@ -12,10 +12,12 @@ describe("DraftService", () => {
     expect(s.getJob(job.id).id).toBe(job.id);
   });
 
-  it("USP를 주면 시안 3개, 레퍼런스를 지정하면 1개", async () => {
+  it("USP 3개면 시안 3개(USP 번호 = 시안 번호), USP 1개에 레퍼런스를 지정하면 그 레퍼런스로 1개", async () => {
     const s = new DraftService();
-    expect((await s.create({ images: IMG, usp: "오래 가는 바삭함" })).job.drafts).toHaveLength(3);
-    expect((await s.create({ images: IMG, reference_id: "TREF03" })).job.drafts).toHaveLength(1);
+    const three = (await s.create({ images: IMG, usps: [{ text: "a" }, { text: "b" }, { text: "c" }] })).job.drafts;
+    expect(three.map((d) => d.usp?.index)).toEqual([0, 1, 2]);
+    const one = (await s.create({ images: IMG, usps: [{ text: "a", reference_id: "TREF03" }] })).job.drafts;
+    expect(one.map((d) => d.reference_id)).toEqual(["TREF03"]);
   });
 
   it("job은 1시간 뒤 만료된다", async () => {
@@ -28,8 +30,8 @@ describe("DraftService", () => {
 
   it("job은 최대 200개, 넘으면 가장 오래된 것부터 지운다", async () => {
     const s = new DraftService();
-    const first = await s.create({ images: IMG, reference_id: "TREF01", mode: "prompt_only" });
-    for (let i = 0; i < JOB_MAX; i++) await s.create({ images: IMG, reference_id: "TREF01", mode: "prompt_only" });
+    const first = await s.create({ images: IMG, usps: [{ text: "x", reference_id: "TREF01" }], mode: "prompt_only" });
+    for (let i = 0; i < JOB_MAX; i++) await s.create({ images: IMG, usps: [{ text: "x", reference_id: "TREF01" }], mode: "prompt_only" });
     expect(s.jobCount).toBe(JOB_MAX);
     expect(() => s.getJob(first.job.id)).toThrow(NotFoundError);
   });
@@ -38,7 +40,7 @@ describe("DraftService", () => {
     const s = new DraftService();
     expect(s.setExcluded("TREF04", true).changed).toBe(true);
     expect(s.setExcluded("TREF04", true).changed).toBe(false);
-    const { job } = await s.create({ images: IMG, usp: "x" });
+    const { job } = await s.create({ images: IMG, usps: [{ text: "a" }, { text: "b" }, { text: "c" }] });
     expect(job.drafts.map((d) => d.reference_id)).not.toContain("TREF04");
     s.setExcluded("TREF04", false);
     expect(s.isExcluded("TREF04")).toBe(false);
@@ -57,7 +59,7 @@ describe("DraftService", () => {
   it("다시 만들기에 실패하면 현재 결과를 유지한다", async () => {
     const adapters: Adapters = createMockAdapters();
     const s = new DraftService(adapters);
-    const { job } = await s.create({ images: IMG, reference_id: "TREF04" });
+    const { job } = await s.create({ images: IMG, usps: [{ text: "x", reference_id: "TREF04" }] });
     const before = s.getJob(job.id).drafts[0];
     adapters.imageGen = { async generate() { throw new Error("생성 실패"); } };
     const r = await s.regenerateWithNotes(job.id, ["소품을 더 적게"], 0);
@@ -65,12 +67,14 @@ describe("DraftService", () => {
     expect(s.getJob(job.id).drafts[0]).toBe(before);
   });
 
-  it("수정사항 다시 만들기: P1 훼손 요청은 제외·경고", async () => {
+  it("수정사항·오브제/색상 수정 다시 만들기: 그 시안만, P1 훼손 요청은 제외·경고", async () => {
     const s = new DraftService();
     const { job } = await s.create({ images: IMG });
-    const r = await s.regenerateWithNotes(job.id, ["로고를 빼 주세요"], 1);
+    const r = await s.regenerateWithNotes(job.id, ["로고를 빼 주세요"], 1, { props: "작은 유리 볼" });
     expect(r.results).toHaveLength(1);
     expect(r.results[0].kept.warnings.join()).toContain("로고 변경·제거");
+    expect(r.results[0].kept.prompt.text).toContain("오브제: 작은 유리 볼");
+    expect(s.getJob(job.id).drafts[0].prompt.text).not.toContain("작은 유리 볼");
   });
 
   it("레퍼런스 검색과 상세, 없는 id는 NotFound", () => {

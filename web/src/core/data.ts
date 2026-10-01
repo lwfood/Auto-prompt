@@ -10,6 +10,7 @@ export interface MatchingWeights {
   score_max: number;
   weights: { product_fit: number; prop_match: number; color_match: number };
   penalties: { structure_trick_incidental: number };
+  fit_labels: { best: number; ok: number };
 }
 
 export const REFERENCES: readonly Reference[] = libraryJson.references as unknown as Reference[];

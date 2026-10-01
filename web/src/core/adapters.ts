@@ -3,10 +3,13 @@
 import { getReference, getTestProduct, REFERENCES } from "./data";
 import type { CheckItem, CompiledPrompt, Product, Reference, Resolution } from "./types";
 
-export type ImageRole = "product" | "reference";
+/** product=제품 이미지(필수), logo=로고 확대, shape=제품 형태, reference=USP별로 PC에서 올린 레퍼런스 */
+export type ImageRole = "product" | "logo" | "shape" | "reference";
 
 export interface InputImage {
   role: ImageRole;
+  /** role=reference일 때 어느 USP의 레퍼런스인지 (0부터) */
+  usp_index?: number;
   /** mock: 테스트 제품 id (TPROD01~04) */
   test_id?: string;
   /** 업로드 이미지 (data URL). mock은 내용을 분석하지 않는다 */
@@ -72,6 +75,19 @@ export function buildChecklist(product: Product): Array<Omit<CheckItem, "pass">>
   return [...shape, ...logo, ...scene];
 }
 
+/** mock이 분석하지 않은 업로드 제품 */
+export function uploadedProduct(name?: string): Product {
+  return {
+    id: "UPLOAD",
+    name_on_pack: name ?? "업로드 제품",
+    package_class: null,
+    colors: { primary: "unknown", secondary: [] },
+    protected_elements: [],
+    package_motifs: [],
+    risks: ["mock 어댑터는 업로드 이미지를 분석하지 않음"],
+  };
+}
+
 let mockSeq = 0;
 
 export function createMockAdapters(): Adapters {
@@ -87,15 +103,7 @@ export function createMockAdapters(): Adapters {
           return p;
         }
         // mock은 업로드 이미지를 분석하지 않는다
-        return {
-          id: "UPLOAD",
-          name_on_pack: img.name ?? "업로드 제품",
-          package_class: null,
-          colors: { primary: "unknown", secondary: [] },
-          protected_elements: [],
-          package_motifs: [],
-          risks: ["mock 어댑터는 업로드 이미지를 분석하지 않음"],
-        };
+        return uploadedProduct(img.name);
       },
     },
     writer: { async refine(prompt) { return prompt; } },

@@ -3,9 +3,9 @@
 ## 1. 자동 테스트 (마지막 확인 기준)
 | 대상 | 도구 | 개수 | 내용 |
 |---|---|---|---|
-| web | vitest | 52 | core 40(규칙·충돌·매칭·컴파일러·파이프라인), API 8, 화면 상태 3, golden 1 |
+| web | vitest | 65 | core(규칙·충돌·매칭·방향·한국어 컴파일러·파이프라인), API 10, 화면 상태 6, golden 1 |
 | mcp | vitest | 18 | 서비스 9, 프로토콜 4, HTTP 4, stdio 실프로세스 1 |
-| engine | Python | 33 | `engine/tests/test_engine.py` 23, `test_pipeline.py` 10 (TS golden 일치 포함) |
+| engine | Python | 36 | `engine/tests/test_engine.py` 26, `test_pipeline.py` 10 (TS golden 일치 포함) |
 | web 흐름 | Playwright | `e2e/flow_check.py` | 레퍼런스 교체, 프롬프트 복사, 입력 유지, 업로드 시 시안 1개 |
 | 타입·빌드 | tsc, next build | — | web, mcp 모두 통과 |
 
